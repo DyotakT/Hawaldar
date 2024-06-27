@@ -1,34 +1,37 @@
 package com.dyotakt.hawaldar
 
-import android.R.color
-import android.app.Application
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+//import androidx.compose.foundation.gestures.ModifierLocalScrollableContainerProvider.value
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,13 +39,14 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -52,15 +56,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.dyotakt.hawaldar.ui.theme.HawaldarTheme
-import java.util.Calendar
 
+private val cl: ColorLogics = ColorLogics()
+private val tl: TextLogics = TextLogics()
+val dataMan: DataMan = DataMan
+var context: Context? = null
 
 class MainActivity : ComponentActivity() {
 
@@ -72,6 +79,8 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        context = this
+        dataMan.init(this)
         setContent {
             HawaldarTheme {
                 // A surface container using the 'background' color from the theme
@@ -83,20 +92,47 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(top = 0.dp),
-                    color = MaterialTheme.colorScheme.background
+//                    color = MaterialTheme.colorScheme.background
+//                    color = Color.Black
                 ) {
                     Scaffold(
                         topBar = {
+                            val showDialog =  remember { mutableStateOf(false) }
+                            val dynamicAppName = remember { mutableStateOf("HAWALDAR") }
+                            if(showDialog.value) {
+                                ButtonDialog(setShowDialog = {
+                                    showDialog.value = it
+                                },s)
+                            }
                             MediumTopAppBar(
                                 title = {
                                     Text(
-                                        text = "HAWALDAR",
+                                        text = dynamicAppName.value,
                                         fontSize = 30.sp,
-                                        fontWeight = FontWeight.Bold
+//                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal=20.dp)
                                     )},
                                 actions = {
-
-                                }
+                                    Button(onClick = {
+                                        showDialog.value = true
+                                    }) {
+                                        Icon(Icons.Default.AddCircle, contentDescription = "Add")
+                                    }
+//                                    Icon(
+//                                        Icons.Default.Add,
+//                                        contentDescription = "Add",
+//                                        modifier = Modifier
+//                                            .height(40.dp)
+//                                            .width(40.dp)
+//                                            .padding(50.dp)
+//                                            .clickable { showDialog.value = true })
+                                },
+                                colors = TopAppBarDefaults.topAppBarColors(
+                                    containerColor = MaterialTheme.colorScheme.background,
+//                                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+//                                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+//                                    actionIconContentColor = MaterialTheme.colorScheme.onSecondary
+                                ),
                             )
 
                         }
@@ -133,8 +169,6 @@ fun MainScreen(
     seconds: Int?,
     context: Context?
 ) {
-    val calender: Calendar = Calendar.getInstance();
-//    var secsIn30 by remember{mutableStateOf((calender.get(Calendar.SECOND))%30)}
     val scrollState = rememberScrollState()
 
     Column (modifier = Modifier
@@ -152,41 +186,41 @@ fun AuthView (listOfItems: List<items>?, s: MainViewModel, context: Context?) {
     val myList by s.myList.observeAsState(listOf())
     val seconds = s.tickerFlow().collectAsState(initial = 30)
     var clickedItem by rememberSaveable { mutableStateOf<Int?>(null) }
-    myList.forEach{items ->
+    myList?.forEach{items ->
         Box(modifier = Modifier
             .shadow(elevation = 0.dp, shape = RoundedCornerShape(30.dp))
-            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .padding(horizontal = 30.dp, vertical = 15.dp)
             .fillMaxWidth()
             .height(height = 100.dp)
             .clip(shape = RoundedCornerShape(18.dp))
-            .background(ConvertToColor(items.backgroundColor))
-            .clickable {clickedItem = items.otp}) {
+            .background(cl.ConvertToColor(items.backgroundColor))
+            .clickable { clickedItem = items.otp }) {
             Row(modifier = Modifier.padding(10.dp)) {
                 Column(modifier = Modifier.padding(start = 10.dp)) {
                     var otp by remember{mutableStateOf(items.otp)}
                     Text(
                         text = "${items.name}",
                         fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = getFontColorDynamic(items.backgroundColor)
+//                        fontWeight = FontWeight.Bold,
+                        color = cl.getFontColorDynamic(items.backgroundColor)
                     )
                     Text(
-                        text = threeSpaceThree(String.format("%06d",items.otp)),
-                        fontSize = 40.sp,
+                        text = tl.threeSpaceThree(String.format("%06d",items.otp)),
+                        fontSize = 35.sp,
                         fontWeight = FontWeight.Bold,
-                        color = getFontColorDynamic(items.backgroundColor)
+                        color = cl.getFontColorDynamic(items.backgroundColor)
                     )
                 }
                 Icon(Icons.Default.CheckCircle, contentDescription = "Icon for Auth item", modifier = Modifier
                     .wrapContentSize(unbounded = true)
-                    .size(130.dp)
+                    .size(120.dp)
                     .offset(x = 10.dp, y = 10.dp)
                     .align(Alignment.CenterVertically)
                     .alpha(0.2f),
-                    tint = getFontColorDynamic(items.backgroundColor)
+                    tint = cl.getFontColorDynamic(items.backgroundColor)
                 )
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(modifier = Modifier.align(Alignment.TopEnd),text = seconds.value.toString(), fontSize = 30.sp, fontWeight = FontWeight.Bold, color = getFontColorDynamicExtraAlpha(items.backgroundColor))
+                    Text(modifier = Modifier.align(Alignment.TopEnd),text = seconds.value.toString(), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = cl.getFontColorDynamicExtraAlpha(items.backgroundColor))
                 }
                 if(clickedItem!=null) {
                     Toast.makeText(context, clickedItem.toString(), Toast.LENGTH_LONG).show()
@@ -198,37 +232,94 @@ fun AuthView (listOfItems: List<items>?, s: MainViewModel, context: Context?) {
     }
 }
 
-fun ConvertToColor(backgroundColor: String): Color {
-    val red: Int = Integer.parseInt(backgroundColor.take(3))
-    val green: Int = Integer.parseInt(backgroundColor.takeLast(6).take(3))
-    val blue: Int = Integer.parseInt(backgroundColor.takeLast(3))
-    return Color(red, green, blue)
-}
+@Composable
+fun ButtonDialog(setShowDialog: (Boolean) -> Unit, s: MainViewModel) {
+    val txtFieldError = remember { mutableStateOf("") }
+    val txtField = remember { mutableStateOf("") }
+    val keyField = remember { mutableStateOf("") }
 
-fun getFontColorDynamic(backgroundColor: String): Color {
-    val red: Int = Integer.parseInt(backgroundColor.take(3))
-    val green: Int = Integer.parseInt(backgroundColor.takeLast(6).take(3))
-    val blue: Int = Integer.parseInt(backgroundColor.takeLast(3))
-    val averageColor: Int = ((red+green+blue))/3
-    return if(averageColor>127) {
-        Color(0,0,0,100)
-    } else {
-        Color(255,255,255,100)
+    Dialog(onDismissRequest = { setShowDialog(false) }) {
+        Surface (
+            shape = RoundedCornerShape(18.dp),
+            color = MaterialTheme.colorScheme.background,
+            modifier = Modifier.fillMaxWidth(0.9f)
+        ){
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp) )
+                {
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Add", modifier = Modifier
+                                .align(Alignment.CenterVertically),
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontFamily = FontFamily.Default,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                        )
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "Close the add dialog",
+                            modifier = Modifier
+                                .height(15.dp)
+                                .width(15.dp)
+                                .clickable { setShowDialog(false) }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    TextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                        placeholder = {Text("Enter Label")},
+                        value = txtField.value,
+                        onValueChange = {
+                            txtField.value = it
+                        })
+                    Spacer(modifier = Modifier.height(10.dp))
+                    TextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                        placeholder = {Text("Enter Key")},
+                        value = keyField.value,
+                        onValueChange = {
+                            keyField.value = it
+                        })
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row( modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Add from Camera",
+                            modifier = Modifier
+                                .height(30.dp)
+                                .width(30.dp)
+                                .clickable { } //Logic to be added
+                        )
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = "Enter",
+                            modifier = Modifier
+                                .height(30.dp)
+                                .width(30.dp)
+                                .clickable {
+                                    dataMan.saveString(txtField.value,keyField.value)
+                                    s.fetchAndPopulateData()
+                                    setShowDialog(false)
+                                }
+                        )
+                    }
+                }
+            }
+        }
     }
-}
-
-fun getFontColorDynamicExtraAlpha(backgroundColor: String): Color {
-    val red: Int = Integer.parseInt(backgroundColor.take(3))
-    val green: Int = Integer.parseInt(backgroundColor.takeLast(6).take(3))
-    val blue: Int = Integer.parseInt(backgroundColor.takeLast(3))
-    val averageColor: Int = ((red+green+blue))/3
-    return if(averageColor>127) {
-        Color(0,0,0,30)
-    } else {
-        Color(255,255,255,30)
-    }
-}
-
-fun threeSpaceThree(originalString: String): String {
-    return (originalString[0] + "" + originalString[1] + "" + originalString[2] + " " + originalString[3] + "" + originalString[4] + "" + originalString[5])
 }
