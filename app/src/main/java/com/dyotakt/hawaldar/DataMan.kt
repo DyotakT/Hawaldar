@@ -3,6 +3,7 @@ package com.dyotakt.hawaldar
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.core.content.edit
 
 object DataMan {
 
@@ -19,6 +20,10 @@ object DataMan {
 
     fun getString(key: String, defaultValue: String): String {
         return sharedPreferences.getString(key, defaultValue) ?: defaultValue
+    }
+
+    fun removeData(key: String) {
+        sharedPreferences.edit().remove(key).apply()
     }
 
     fun getAllData(): MutableMap<String, *>? {

@@ -10,38 +10,25 @@ import kotlinx.coroutines.launch
 import kotlin.math.floor
 
 class MainViewModel: ViewModel() {
-//    val _myList: MutableLiveData<List<items>> = MutableLiveData<List<items>>()
-
     private var map: MutableMap<String, *>? = dataMan.getAllData()
 
-    private val _myList = MutableLiveData<List<items>>(listOf(
+    private var _myList = MutableLiveData<List<items>>(listOf(
         items("Steam",(floor(Math.random()*100000)).toString(),"Testing123","023026033", 123456),
         items("Google",(floor(Math.random()*100000)).toString(),"Testing1234","234234234", 123456),
-        items("Facebook",(floor(Math.random()*100000)).toString(),"Testing12345","024119242", 123456)
+        items("Facebook",(floor(Math.random()*100000)).toString(),"Testing12345","059089152", 123456)
+
     ))
     val myList: LiveData<List<items>> = _myList
 
     val t1: totp = totp()
-    var timerValue: Int = 0
 
     init {
         fetchAndPopulateData()
         iterateAndGetOtp()
         collectFlow()
-
     }
 
     fun fetchAndPopulateData() {
-//        _myList.value = _myList.value?.plus(items("X",(floor(Math.random()*100000)).toString(),"Testing123456","010010010", 123456))
-//        _myList.value = _myList.value?.plus(
-//            items(
-//                "DataMan",
-//                (floor(Math.random()*100000)).toString(), //UID Generation
-//                dataMan.getString("data_key","Testing12345"), //Pulling the key from SharedPreferences
-//                "010010010",
-//                123456
-//            )
-//        )
         map = dataMan.getAllData()
         map?.forEach { entry ->
             _myList.value = _myList.value?.plus(
@@ -54,7 +41,6 @@ class MainViewModel: ViewModel() {
                 )
             )
         }
-
     }
 
     fun iterateAndGetOtp() {
@@ -66,7 +52,7 @@ class MainViewModel: ViewModel() {
     fun updateOTP(itemID: String) {
         val updatedList = _myList.value?.map {
             if(it.id == itemID) {
-                it.copy(otp = t1.GenerateOTP(it.data,""))
+                it.copy(otp = t1.GenerateOTP(it.data,"")) //key is empty as it will take the current GMT time for it
             } else {
                 it
             }
