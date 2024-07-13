@@ -462,7 +462,9 @@ fun ChangeableAuthView(currentItem: items, s: MainViewModel, context: Context?) 
                             horizontalArrangement = Arrangement.SpaceBetween) {
                             Icon(
                                 Icons.Default.Delete,
-                                modifier = Modifier.size(40.dp),
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clickable {  }, //Deletion logic to be written here
                                 contentDescription = "Delete Icon for Auth item",
                                 tint = Color(255, 20, 20,128)
                             )

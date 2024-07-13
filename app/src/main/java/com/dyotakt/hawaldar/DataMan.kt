@@ -29,4 +29,12 @@ object DataMan {
     fun getAllData(): MutableMap<String, *>? {
         return sharedPreferences.all
     }
+
+    fun convertToSharedPreferencesFormat(currentData: items): String {
+        return currentData.name+"|"+
+                currentData.data+"|"+
+                currentData.backgroundColor+"|"+
+                currentData.icon+"|"+
+                "123456"
+    }
 }

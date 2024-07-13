@@ -8,5 +8,6 @@ data class items (
     val id: String,
     var data : String,
     val backgroundColor: String,
+    val icon: String,
     var otp: Int
 )

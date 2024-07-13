@@ -38,6 +38,7 @@ class fileMan {
                 (Math.floor(Math.random() * 100000)).toString(),
                 "Testing123",
                 "023026033",
+                "steam",
                 123456
             ),
             items(
@@ -45,6 +46,7 @@ class fileMan {
                 (Math.floor(Math.random() * 100000)).toString(),
                 "Testing1234",
                 "234234234",
+                "google",
                 123456
             )
         )
