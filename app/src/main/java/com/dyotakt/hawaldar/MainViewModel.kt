@@ -1,5 +1,8 @@
 package com.dyotakt.hawaldar
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context.CLIPBOARD_SERVICE
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,10 +24,10 @@ class MainViewModel: ViewModel() {
     val myList: LiveData<List<items>> = _myList
 
 
+    val clipboardManager =  context?.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
 
     fun fetchAndPopulateData() {
         map = dataMan.getAllData()
-//        System.out.println("MAP"+map);
         map?.forEach { entry ->
            _myList.value = _myList.value?.plus(
                 items(
@@ -37,6 +40,10 @@ class MainViewModel: ViewModel() {
                 )
             )
         }
+    }
+
+    fun putData(currentItem: items) {
+        dataMan.saveString(currentItem.data, dataMan.convertToSharedPreferencesFormat(currentItem))
     }
 
     val t1: totp = totp()
@@ -75,15 +82,6 @@ class MainViewModel: ViewModel() {
         }
     }
 
-//    fun iterateAndGetOtp() {
-//        _myList.value.keys { index:String, items:items ->
-//            updateOTP(items.id)
-//        }
-//        for(currentKey in _myList.value?.keys!!) {
-//            _myList.value!!.get(currentKey)?.let { updateOTP(it.id) }
-//        }
-//    }
-
     fun updateOTP(itemID: String) {
         val updatedList = _myList.value?.map {
             if(it.id == itemID) {
@@ -93,5 +91,9 @@ class MainViewModel: ViewModel() {
             }
         }
         _myList.value = updatedList!!
+    }
+
+    fun copyToClipboard(otp: Int) {
+        clipboardManager.setPrimaryClip(ClipData.newPlainText("OTP", otp.toString()))
     }
 }

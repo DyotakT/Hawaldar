@@ -247,6 +247,7 @@ fun AuthView (currentItem: items, s: MainViewModel, context: Context?) {
                 .align(Alignment.CenterVertically)) {
                 var otp by remember{mutableStateOf(currentItem.otp)}
                 if(currentItem == clickedItem) {
+                    s.copyToClipboard(currentItem.otp)
                     Text(
                         text = "Copied!",
                         fontSize = 35.sp,
@@ -551,6 +552,7 @@ fun ButtonDialog(setShowDialog: (Boolean) -> Unit, s: MainViewModel) {
                     Row( modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically) {
+
                         Icon(
                             Icons.Default.Add,
                             contentDescription = "Add from Camera",
@@ -570,7 +572,9 @@ fun ButtonDialog(setShowDialog: (Boolean) -> Unit, s: MainViewModel) {
                                 .height(30.dp)
                                 .width(30.dp)
                                 .clickable {
-                                    dataMan.saveString(txtField.value, keyField.value)
+//                                    dataMan.saveString(txtField.value, keyField.value)
+//                                    s.putData(txtField.value, keyField.value)
+                                    s.putData(items("",txtField.value,keyField.value,"","",123456))
                                     s.fetchAndPopulateData()
                                     setShowDialog(false)
                                 }
